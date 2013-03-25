@@ -1,0 +1,4 @@
+RamKaCollector
+==============
+
+Applications collector

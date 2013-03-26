@@ -103,7 +103,7 @@ class RamKaCollector {
     public function setConfig($config) {
         $this -> config -> merge($config);
 
-        if($this -> environment !== null and (is_string($config) and is_file($config))) {
+        if($this -> environment !== null and is_string($config)) {
             $this -> config -> load(dirname($config) . DIRECTORY_SEPARATOR . $this -> environment . '/main.php');
         }
 

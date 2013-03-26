@@ -43,7 +43,7 @@ class RcConfig implements ArrayAccess {
      */
     public function merge($config) {
         if(is_string($config)) {
-            $this -> load($config);
+            return $this -> load($config);
         }
         else if($config instanceof self) {
             $config = $config -> toArray();

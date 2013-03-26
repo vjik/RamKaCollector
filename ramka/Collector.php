@@ -12,7 +12,7 @@ class RamKaCollector {
     /**
      * имя интерфейса описывающего объект информации о приложении
      */
-    const INFO_INTERFACE = 'RamKaApplicationInfoInterface';
+    const INFO_INTERFACE = 'iRcApplication';
 
     /**
      * шаблон для автоматического поиска приложений
@@ -346,10 +346,41 @@ class RamKaCollector {
     /**
      * сохранение конфигурации
      * @param RcConfig $config
-     * @param iRcApplication $application
+     * @param iRcApplication|RcApplication $application
      */
     public function setCollectorConfig(RcConfig $config, iRcApplication $application) {
+        if($application -> isCli() === false) {
+            $config -> set('homeUrl', $application -> getBaseUrl());
+        }
 
+        $config -> merge(array(
+            'id'       => $application -> getId(),
+            'basePath' => $application -> getBasePath(),
+
+            'import' => array(
+                'ramka.behaviors.*',
+                'ramka.components.*'
+            ),
+
+            'behaviors' => array(
+                'RamKaCollector' => array(
+                    'class' => 'RcApplicationBehavior'
+                )
+            ),
+
+            'components' => array(
+                'messages' => array(
+                    'extensionPaths' => array_map(function($directory) {
+                        return $directory . '/messages';
+                    }, $this -> pathAliases)
+                ),
+
+                'urlManager' => array(
+                    'class'      => 'RcUrlManager',
+                    'urlAliases' => $this -> urlAliases
+                )
+            )
+        ));
     }
 
     /**
@@ -363,7 +394,7 @@ class RamKaCollector {
             throw new Exception('Yii framework is not loaded.');
         }
 
-        if(($application !== null and ($application = $this -> findSpecifiedApplication($application)) !== null) or ($application !== null and ($application = $this -> findActiveApplication()) === null)) {
+        if(($application !== null and ($application = $this -> findSpecifiedApplication($application)) === null) or ($application = $this -> findActiveApplication()) === null) {
             throw new CHttpException(400, 'Bad Request');
         }
 
@@ -373,11 +404,11 @@ class RamKaCollector {
             $config = new RcConfig($config);
         }
 
+        $this -> setCollectorConfig($config, $application);
+
         if($application -> useGlobalConfig()) {
             $config = $this -> config -> merge($config);
         }
-
-        $this -> setCollectorConfig($config, $application);
 
         foreach($this -> pathAliases as $alias => $path) {
             Yii::setPathOfAlias($alias, $path);

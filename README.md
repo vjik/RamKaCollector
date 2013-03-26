@@ -1,4 +1,4 @@
-RamKaCollector
+Yii applications collector
 ==============
 
-Applications collector
+---
